@@ -1,0 +1,37 @@
+version: '3.1'
+
+services:
+
+  wordpress_db:
+    container_name: airliftwordpressdb 
+    image: mariadb:latest
+    restart: always
+    volumes:
+      - airliftdb:/var/lib/mysql
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+        - wordpress_db:db
+    ports:
+        - 8181:80
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_ROOT_PASSWORD: password 
+      PMA_HOST: wordpress_db 
+
+  wordpress:
+    build: ./wordpress
+    ports:
+      - 80:80
+    volumes:
+      - ./wp-content:/var/www/html/wp-content/
+    restart: unless-stopped
+
+volumes:
+  airliftdb:
