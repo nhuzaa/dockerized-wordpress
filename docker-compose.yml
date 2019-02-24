@@ -3,35 +3,52 @@ version: '3.1'
 services:
 
   wordpress_db:
-    container_name: airliftwordpressdb 
+    container_name: wordpress_db
     image: mariadb:latest
     restart: always
     volumes:
-      - airliftdb:/var/lib/mysql
+      - avartandb:/var/lib/mysql
     environment:
-      MYSQL_USERNAME: root
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} 
+      MYSQL_DATABASE: ${MYSQL_DATABASE_NAME} 
+      MYSQL_USER: ${MYSQL_ROOT_USER} 
+      MYSQL_PASSWORD: ${MYSQL_DATABASE_USER_PASSWORD} 
     ports:
-      - "3306:3306"
+      - "${PORT_MYSQL}:3306"
 
   phpmyadmin:
+    container_name: phpmyadmin
     image: phpmyadmin/phpmyadmin
     links:
         - wordpress_db:db
     ports:
-        - 8181:80
+        - "${PORT_PHPMYADMIN}:80"
     environment:
-      MYSQL_USERNAME: root
-      MYSQL_ROOT_PASSWORD: password 
-      PMA_HOST: wordpress_db 
+      MYSQL_USERNAME: ${MYSQL_ROOT_USER} 
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} 
+      PMA_HOST: wordpress_db
 
   wordpress:
+    depends_on:
+      - wordpress_db
     build: ./wordpress
+    container_name: wordpress
     ports:
-      - 80:80
+      - "${PORT_WORDPRESS}:80"
     volumes:
       - ./wp-content:/var/www/html/wp-content/
+      - ./wordpress/php.conf.uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+
     restart: unless-stopped
+    environment:
+       WORDPRESS_DEBUG: 0
+       WORDPRESS_DB_NAME: ${MYSQL_DATABASE_NAME} 
+       WORDPRESS_DB_HOST: wordpress_db:3306
+       WORDPRESS_DB_USER: ${MYSQL_ROOT_USER} 
+       WORDPRESS_DB_PASSWORD: ${MYSQL_DATABASE_USER_PASSWORD} 
+
 
 volumes:
-  airliftdb:
+  avartandb:
+
+
