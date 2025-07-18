@@ -54,7 +54,6 @@ wp-config.php
 .env.staging
 
 # WordPress installation
-wordpress/
 wp-content/uploads/
 wp-content/cache/
 wp-content/upgrade/
